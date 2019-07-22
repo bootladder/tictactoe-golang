@@ -79,17 +79,25 @@ func (app *commandLineApp) printAppState() {
 	case AppStatePlaying:
 		fmt.Print("Playing!\n")
 		app.printBoard()
+	case AppStateGameOver:
+		fmt.Print("GAME OVER!\n")
+		app.printBoard()
 	}
 }
 
 func (app *commandLineApp) printAppPrompt() {
-	if app.state == AppStateReady {
+	switch state := app.state; state {
+	case AppStateReady:
 		fmt.Print("[n] : Start new game\n")
 		fmt.Print("[x] : Awesome unimplemented features\n")
 		fmt.Print("Enter Choice:  ")
-	} else {
+	case AppStatePlaying:
 		fmt.Print("To move, enter the number of the square.\n")
 		fmt.Print("What's your move?: ")
+	case AppStateGameOver:
+		fmt.Print("[n] : Start new game\n")
+		fmt.Print("[x] : Awesome unimplemented features\n")
+		fmt.Print("Enter Choice:  ")
 	}
 }
 

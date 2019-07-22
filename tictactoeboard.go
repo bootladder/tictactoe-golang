@@ -26,7 +26,11 @@ type tictactoeboard struct {
 }
 
 func (b *tictactoeboard) init() {
-	//zero out the board
+	for i := 0; i < 3; i++ {
+		for j := 0; j < 3; j++ {
+			b.board[i][j] = SquareEmpty
+		}
+	}
 }
 
 func (b *tictactoeboard) makeMove(player squareValue, row, col int) error {
@@ -99,5 +103,5 @@ func (b *tictactoeboard) checkWinner(val squareValue) bool {
 }
 
 func (b *tictactoeboard) checkTie() bool {
-	return false
+	return true
 }

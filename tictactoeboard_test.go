@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -43,7 +42,6 @@ func Test_determineBoardState_XWins_AcrossTheMiddle(t *testing.T) {
 	state := board.determineBoardState()
 	assert.Equal(t, WinnerX, state)
 
-	fmt.Printf("%v", board.board)
 }
 
 func Test_determineBoardState_XWins_DownTheMiddle(t *testing.T) {
@@ -54,8 +52,6 @@ func Test_determineBoardState_XWins_DownTheMiddle(t *testing.T) {
 
 	state := board.determineBoardState()
 	assert.Equal(t, WinnerX, state)
-
-	fmt.Printf("%v", board.board)
 }
 
 func Test_determineBoardState_OWins(t *testing.T) {
@@ -68,7 +64,7 @@ func Test_determineBoardState_OWins(t *testing.T) {
 	assert.Equal(t, WinnerO, state)
 }
 
-func NOT____Test_determineBoardState_TieGame(t *testing.T) {
+func Test_determineBoardState_TieGame(t *testing.T) {
 	var board tictactoeboard
 	board.board = [3][3]squareValue{
 		{SquareX, SquareO, SquareX},
@@ -78,4 +74,14 @@ func NOT____Test_determineBoardState_TieGame(t *testing.T) {
 
 	state := board.determineBoardState()
 	assert.Equal(t, TieGame, state)
+}
+
+func Test_init_zeroesTheBoard(t *testing.T) {
+	var board tictactoeboard
+	board.makeMove(SquareO, 0, 0)
+	board.makeMove(SquareO, 0, 1)
+	board.makeMove(SquareO, 0, 2)
+
+	board.init()
+	assert.Equal(t, SquareEmpty, board.getSquareValue(0, 0))
 }
