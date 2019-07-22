@@ -44,15 +44,11 @@ func (b *tictactoeboard) getSquareValue(row, col int) squareValue {
 func (b *tictactoeboard) determineBoardState() boardState {
 
 	if b.checkWinner(SquareX) {
-
 		return WinnerX
 	}
-
 	if b.checkWinner(SquareO) {
-
 		return WinnerO
 	}
-
 	if b.checkTie() {
 		return TieGame
 	}
@@ -86,10 +82,10 @@ func (b *tictactoeboard) checkWinner(val squareValue) bool {
 	if b00 == b10 && b10 == b20 && b20 == val {
 		return true
 	}
-	if b10 == b11 && b11 == b21 && b21 == val {
+	if b11 == b11 && b11 == b21 && b21 == val {
 		return true
 	}
-	if b02 == b12 && b12 == b22 && b22 == val {
+	if b22 == b12 && b12 == b22 && b22 == val {
 		return true
 	}
 	//diagonals
@@ -103,5 +99,5 @@ func (b *tictactoeboard) checkWinner(val squareValue) bool {
 }
 
 func (b *tictactoeboard) checkTie() bool {
-	return true
+	return false
 }
