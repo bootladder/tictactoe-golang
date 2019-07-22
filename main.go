@@ -34,10 +34,12 @@ func main() {
 
 	var app commandLineApp
 	app.init()
+
+	clearScreen()
 	fmt.Print("\n\n\nWelcome to Tic Tac Toe!\n\n\n")
+
 	for ok := true; ok; ok = true {
 
-		goterm.Clear()
 		app.printAppState()
 		app.printAppPrompt()
 		reader := bufio.NewReader(os.Stdin)
@@ -48,7 +50,14 @@ func main() {
 		app.handleCommand(command)
 
 		fmt.Println(text)
+		clearScreen()
 	}
+}
+
+func clearScreen() {
+	goterm.Clear()
+	goterm.MoveCursor(1, 1)
+	goterm.Flush()
 }
 
 func (app *commandLineApp) init() {
@@ -61,6 +70,7 @@ func (app *commandLineApp) printAppState() {
 	} else {
 
 		fmt.Print("Playing!\n")
+		app.printBoard()
 	}
 }
 
@@ -70,6 +80,7 @@ func (app *commandLineApp) printAppPrompt() {
 		fmt.Print("[x] : Awesome unimplemented features\n")
 		fmt.Print("Enter Choice:  ")
 	} else {
+		fmt.Print("To move, enter the number of the square.\n")
 		fmt.Print("What's your move?: ")
 	}
 }
@@ -83,7 +94,6 @@ func parseUserInput(text string) commandLineAppCommand {
 func (app *commandLineApp) handleCommand(command commandLineAppCommand) {
 
 	if app.state == AppStateReady {
-		//start the game
 		app.startGame()
 		app.state = AppStatePlaying
 	}
@@ -93,4 +103,21 @@ func (app *commandLineApp) handleCommand(command commandLineAppCommand) {
 
 func (app *commandLineApp) startGame() {
 	app.board.init()
+}
+
+func (app *commandLineApp) printBoard() {
+
+	b00 := app.board.getSquareValue(0, 0)
+	b01 := app.board.getSquareValue(0, 0)
+	b02 := app.board.getSquareValue(0, 0)
+	b10 := app.board.getSquareValue(0, 0)
+	b11 := app.board.getSquareValue(0, 0)
+	b12 := app.board.getSquareValue(0, 0)
+	b20 := app.board.getSquareValue(0, 0)
+	b21 := app.board.getSquareValue(0, 0)
+	b22 := app.board.getSquareValue(0, 0)
+
+	fmt.Printf("| %v | %v | %v |\n", b00, b01, b02)
+	fmt.Printf("| %v | %v | %v |\n", b10, b11, b12)
+	fmt.Printf("| %v | %v | %v |\n", b20, b21, b22)
 }
