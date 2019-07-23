@@ -102,8 +102,7 @@ func Test_firstMove_humanPicked_square9_cpuTakesMiddleSquare(t *testing.T) {
 	assert.Equal(t, 1, col)
 }
 
-// This test depends on randomness so will be flaky
-func Test_cpuMakeMove_cornerAvailable_opponentDoesNotHaveTwoInARow_middleUnavailable_cpuPicksRandomCorner(t *testing.T) {
+func Test_cpuMakeMove_cornerAvailable_opponentDoesNotHaveTwoInARow_middleUnavailable_cpuPicksCorner(t *testing.T) {
 	var board tictactoeboard
 	board.board = [3][3]squareValue{
 		{SquareEmpty, SquareEmpty, SquareEmpty},
@@ -130,4 +129,46 @@ func assertCornerMove(t *testing.T, row, col int) {
 		ok = true
 	}
 	assert.Equal(t, true, ok)
+}
+
+func Test_cpuMakeMove_opponentHasOppositeCorners_picksNonCorner(t *testing.T) {
+	var board tictactoeboard
+	board.board = [3][3]squareValue{
+		{SquareX, SquareEmpty, SquareEmpty},
+		{SquareEmpty, SquareO, SquareEmpty},
+		{SquareEmpty, SquareEmpty, SquareX},
+	}
+
+	row, col := cpuMakeMove(board)
+	assertNonCornerMove(t, row, col)
+}
+
+func assertNonCornerMove(t *testing.T, row, col int) {
+	ok := false
+	if row == 0 && col == 1 {
+		ok = true
+	}
+	if row == 1 && col == 0 {
+		ok = true
+	}
+	if row == 1 && col == 2 {
+		ok = true
+	}
+	if row == 2 && col == 1 {
+		ok = true
+	}
+	assert.Equal(t, true, ok)
+}
+
+func Test_cpuMakeMove_cpuCouldWinRightNow_picksWinningMove(t *testing.T) {
+	var board tictactoeboard
+	board.board = [3][3]squareValue{
+		{SquareX, SquareO, SquareEmpty},
+		{SquareEmpty, SquareO, SquareEmpty},
+		{SquareEmpty, SquareEmpty, SquareX},
+	}
+
+	row, col := cpuMakeMove(board)
+	assert.Equal(t, 2, row)
+	assert.Equal(t, 1, col)
 }

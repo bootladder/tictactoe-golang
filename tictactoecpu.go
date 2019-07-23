@@ -8,6 +8,11 @@ import (
 
 func cpuMakeMove(board tictactoeboard) (int, int) {
 
+	if cpuCanWinRightNow(board) {
+		move := cpuPickWinningMove(board)
+		return move.row, move.col
+	}
+
 	row, col, err := cpuGetMoveThatStopsThreeInARow(board)
 	if err == nil {
 		return row, col
@@ -18,8 +23,15 @@ func cpuMakeMove(board tictactoeboard) (int, int) {
 		return 1, 1
 	}
 
+	if cpuOpponentHasOppositeCorners(board) {
+		move, err := cpuPickNonCorner(board)
+		if err == nil {
+			return move.row, move.col
+		}
+	}
+
 	//Takes Corner if Possible (may remove this later)
-	move, err := cpuPickRandomCorner(board)
+	move, err := cpuPickCorner(board)
 	if err == nil {
 		return move.row, move.col
 	}
@@ -80,8 +92,7 @@ func cpuPickRandomMove(board tictactoeboard) rowcolTuple {
 	return moves[randomIndex]
 }
 
-//actually this is not random
-func cpuPickRandomCorner(board tictactoeboard) (rowcolTuple, error) {
+func cpuPickCorner(board tictactoeboard) (rowcolTuple, error) {
 	if board.board[0][0] == SquareEmpty {
 		return rowcolTuple{0, 0}, nil
 	}
@@ -96,4 +107,60 @@ func cpuPickRandomCorner(board tictactoeboard) (rowcolTuple, error) {
 	}
 
 	return rowcolTuple{0, 0}, errors.New("No Corner Available")
+}
+
+func cpuOpponentHasOppositeCorners(board tictactoeboard) bool {
+	if board.board[0][0] == SquareX && board.board[2][2] == SquareX {
+		return true
+	}
+	if board.board[0][2] == SquareX && board.board[2][0] == SquareX {
+		return true
+	}
+	return false
+}
+func cpuPickNonCorner(board tictactoeboard) (rowcolTuple, error) {
+
+	if board.board[0][1] == SquareEmpty {
+		return rowcolTuple{0, 1}, nil
+	}
+	if board.board[1][0] == SquareEmpty {
+		return rowcolTuple{1, 0}, nil
+	}
+	if board.board[1][2] == SquareEmpty {
+		return rowcolTuple{1, 2}, nil
+	}
+	if board.board[2][1] == SquareEmpty {
+		return rowcolTuple{2, 1}, nil
+	}
+
+	return rowcolTuple{0, 0}, errors.New("No Non Corner Available")
+}
+
+func cpuCanWinRightNow(board tictactoeboard) bool {
+
+	availableMoves := cpuGetAvailableMoves(board)
+
+	// If the CPU were to pick this move, would CPU win?
+	for _, move := range availableMoves {
+		tempBoard := board
+		tempBoard.makeMove(SquareO, move.row, move.col)
+		if tempBoard.determineBoardState() == WinnerO {
+			return true
+		}
+	}
+	return false
+}
+
+func cpuPickWinningMove(board tictactoeboard) rowcolTuple {
+	availableMoves := cpuGetAvailableMoves(board)
+
+	// If the CPU were to pick this move, would CPU win?
+	for _, move := range availableMoves {
+		tempBoard := board
+		tempBoard.makeMove(SquareO, move.row, move.col)
+		if tempBoard.determineBoardState() == WinnerO {
+			return move
+		}
+	}
+	return rowcolTuple{0, 0} // THIS SHLD NOT HAPPEN!
 }
