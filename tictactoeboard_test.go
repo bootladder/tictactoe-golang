@@ -64,6 +64,18 @@ func Test_determineBoardState_OWins(t *testing.T) {
 	assert.Equal(t, WinnerO, state)
 }
 
+func Test_determineBoardState_GameInProgress(t *testing.T) {
+	var board tictactoeboard
+	board.board = [3][3]squareValue{
+		{SquareX, SquareO, SquareEmpty},
+		{SquareO, SquareO, SquareEmpty},
+		{SquareX, SquareX, SquareO},
+	}
+
+	state := board.determineBoardState()
+	assert.Equal(t, GameInProgress, state)
+}
+
 func Test_determineBoardState_TieGame(t *testing.T) {
 	var board tictactoeboard
 	board.board = [3][3]squareValue{

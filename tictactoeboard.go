@@ -53,7 +53,8 @@ func (b *tictactoeboard) determineBoardState() boardState {
 	if b.checkWinner(SquareO) {
 		return WinnerO
 	}
-	if b.checkTie() {
+
+	if b.allSquaresTaken() {
 		return TieGame
 	}
 	return GameInProgress
@@ -86,10 +87,10 @@ func (b *tictactoeboard) checkWinner(val squareValue) bool {
 	if b00 == b10 && b10 == b20 && b20 == val {
 		return true
 	}
-	if b11 == b11 && b11 == b21 && b21 == val {
+	if b01 == b11 && b11 == b21 && b21 == val {
 		return true
 	}
-	if b22 == b12 && b12 == b22 && b22 == val {
+	if b02 == b12 && b12 == b22 && b22 == val {
 		return true
 	}
 	//diagonals
@@ -102,6 +103,14 @@ func (b *tictactoeboard) checkWinner(val squareValue) bool {
 	return false
 }
 
-func (b *tictactoeboard) checkTie() bool {
+func (b *tictactoeboard) allSquaresTaken() bool {
+
+	for i := 0; i < 3; i++ {
+		for j := 0; j < 3; j++ {
+			if b.board[i][j] == SquareEmpty {
+				return false
+			}
+		}
+	}
 	return true
 }

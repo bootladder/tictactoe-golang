@@ -12,11 +12,11 @@ import (
 
 type commandLineAppState int
 
-// Hello
 const (
-	AppStateReady    commandLineAppState = 0
-	AppStatePlaying  commandLineAppState = 1
-	AppStateGameOver commandLineAppState = 2
+	AppStateReady         commandLineAppState = 0
+	AppStatePlaying       commandLineAppState = 1
+	AppStateGameOver      commandLineAppState = 2
+	AppStateDoingFuzzTest commandLineAppState = 3
 )
 
 type commandLineAppCommand struct {
@@ -26,10 +26,10 @@ type commandLineAppCommand struct {
 
 type commandLineAppCommandType int
 
-//Hello
 const (
 	AppCommandStartGame commandLineAppCommandType = 0
 	AppCommandMakeMove  commandLineAppCommandType = 1
+	AppCommandFuzzTest  commandLineAppCommandType = 2
 )
 
 type commandLineApp struct {
@@ -42,14 +42,13 @@ func main() {
 	var app commandLineApp
 	app.init()
 
-	clearScreen()
-	fmt.Print("\n\n\nWelcome to Tic Tac Toe!\n\n\n")
-
 	for ok := true; ok; ok = true {
 
 		clearScreen()
 		app.printAppState()
 		app.printAppPrompt()
+
+		//Read command from user
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
 		text = strings.TrimSuffix(text, "\n")
@@ -81,7 +80,17 @@ func (app *commandLineApp) printAppState() {
 		app.printBoard()
 	case AppStateGameOver:
 		fmt.Print("GAME OVER!\n")
+		switch app.board.determineBoardState() {
+		case WinnerX:
+			fmt.Print("X Wins!\n")
+		case WinnerO:
+			fmt.Print("O Wins!\n")
+		case TieGame:
+			fmt.Print("Tie Game!\n")
+		}
 		app.printBoard()
+	case AppStateDoingFuzzTest:
+		fmt.Print("Fuzzing... will stop when CPU loses\n")
 	}
 }
 
@@ -89,6 +98,7 @@ func (app *commandLineApp) printAppPrompt() {
 	switch state := app.state; state {
 	case AppStateReady:
 		fmt.Print("[n] : Start new game\n")
+		fmt.Print("[f] : Do CPU Fuzz Test\n")
 		fmt.Print("[x] : Awesome unimplemented features\n")
 		fmt.Print("Enter Choice:  ")
 	case AppStatePlaying:
@@ -98,10 +108,16 @@ func (app *commandLineApp) printAppPrompt() {
 		fmt.Print("[n] : Start new game\n")
 		fmt.Print("[x] : Awesome unimplemented features\n")
 		fmt.Print("Enter Choice:  ")
+	case AppStateDoingFuzzTest:
+		fmt.Print("CTRL-C to exit\n")
 	}
 }
 
 func parseUserInput(text string) (commandLineAppCommand, error) {
+
+	if text == "f" {
+		return commandLineAppCommand{AppCommandFuzzTest, 1}, nil
+	}
 
 	if text == "n" {
 		return commandLineAppCommand{AppCommandStartGame, 1}, nil
@@ -144,32 +160,89 @@ func parseUserInput(text string) (commandLineAppCommand, error) {
 	}
 
 	return commandLineAppCommand{AppCommandStartGame, 1}, errors.New("Invalid")
-
 }
 
 func (app *commandLineApp) handleCommand(command commandLineAppCommand) {
 
-	switch os := command.ctype; os {
+	switch cmd := command.ctype; cmd {
+
 	case AppCommandStartGame:
 		app.startGame()
 		app.state = AppStatePlaying
+
 	case AppCommandMakeMove:
+
+		//Make Human Move (Human always plays X)
 		row, col := squareNumberToRowCol(command.cdata)
-		//Player always plays X
 		app.board.makeMove(SquareX, row, col)
-
-		//Check Game State
-
-		//Make CPU move
-		cpuRow, cpuCol := 0, 0
-		app.board.makeMove(SquareO, cpuRow, cpuCol)
 
 		//Check Game State
 		boardState := app.board.determineBoardState()
 
-		if boardState == WinnerX {
+		if boardState != GameInProgress {
 			app.state = AppStateGameOver
+			break
 		}
+
+		//Make CPU move
+		cpuRow, cpuCol := cpuMakeMove(app.board)
+		app.board.makeMove(SquareO, cpuRow, cpuCol)
+
+		//Check Game State
+		boardState = app.board.determineBoardState()
+
+		if boardState != GameInProgress {
+			app.state = AppStateGameOver
+			break
+		}
+
+	case AppCommandFuzzTest:
+		//for now just doing another infinite loop in here
+
+		fuzzBoard := tictactoeboard{}
+
+		for ok := true; ok; ok = true {
+			fmt.Print("\nPlaying fuzz game...")
+			if fuzzBoard.determineBoardState() == WinnerX {
+				fmt.Print("\nX won.... not good!!")
+				fmt.Printf("%v", fuzzBoard.board)
+				os.Exit(2)
+			}
+			if fuzzBoard.determineBoardState() == WinnerO {
+				fmt.Print("O won")
+			}
+			if fuzzBoard.determineBoardState() == TieGame {
+				fmt.Print("Tie Game")
+			}
+			fuzzBoard.init()
+
+			for zzz := true; zzz; zzz = true {
+				//Make Random Human Move
+				move := cpuPickRandomMove(fuzzBoard)
+				//fmt.Printf("X Plays: %d %d\n", move.row, move.col)
+				fuzzBoard.makeMove(SquareX, move.row, move.col)
+
+				//Check Game State
+				boardState := fuzzBoard.determineBoardState()
+
+				if boardState != GameInProgress {
+					break
+				}
+
+				//Make CPU move
+				cpuRow, cpuCol := cpuMakeMove(fuzzBoard)
+				//fmt.Printf("O Plays: %d %d\n", cpuRow, cpuCol)
+				fuzzBoard.makeMove(SquareO, cpuRow, cpuCol)
+
+				//Check Game State
+				boardState = fuzzBoard.determineBoardState()
+
+				if boardState != GameInProgress {
+					break
+				}
+			}
+		}
+
 	default:
 		fmt.Print("Z")
 	}

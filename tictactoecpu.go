@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"math/rand"
+	"time"
 )
 
 func cpuMakeMove(board tictactoeboard) (int, int) {
@@ -13,11 +14,18 @@ func cpuMakeMove(board tictactoeboard) (int, int) {
 	}
 
 	//Takes Middle Square if possible (may remove this later)
-	if cpuCheckBoardEmpty(board) {
+	if board.getSquareValue(1, 1) == SquareEmpty {
 		return 1, 1
 	}
 
-	return 0, 0
+	//Takes Corner if Possible (may remove this later)
+	move, err := cpuPickRandomCorner(board)
+	if err == nil {
+		return move.row, move.col
+	}
+
+	move = cpuPickRandomMove(board)
+	return move.row, move.col
 }
 
 func cpuCheckBoardEmpty(board tictactoeboard) bool {
@@ -65,8 +73,27 @@ func cpuGetAvailableMoves(board tictactoeboard) []rowcolTuple {
 }
 
 func cpuPickRandomMove(board tictactoeboard) rowcolTuple {
+	rand.Seed(time.Now().UnixNano())
 	moves := cpuGetAvailableMoves(board)
 	randomIndex := rand.Intn(len(moves))
 
 	return moves[randomIndex]
+}
+
+//actually this is not random
+func cpuPickRandomCorner(board tictactoeboard) (rowcolTuple, error) {
+	if board.board[0][0] == SquareEmpty {
+		return rowcolTuple{0, 0}, nil
+	}
+	if board.board[0][2] == SquareEmpty {
+		return rowcolTuple{0, 2}, nil
+	}
+	if board.board[2][0] == SquareEmpty {
+		return rowcolTuple{2, 0}, nil
+	}
+	if board.board[2][2] == SquareEmpty {
+		return rowcolTuple{2, 2}, nil
+	}
+
+	return rowcolTuple{0, 0}, errors.New("No Corner Available")
 }
