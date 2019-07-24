@@ -4,7 +4,6 @@ import "errors"
 
 type squareValue int
 
-// Hello
 const (
 	SquareEmpty squareValue = 0
 	SquareX     squareValue = 1
@@ -13,7 +12,6 @@ const (
 
 type boardState int
 
-// Hello
 const (
 	WinnerX        boardState = 0
 	WinnerO        boardState = 1

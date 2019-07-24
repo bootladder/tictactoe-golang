@@ -6,37 +6,31 @@ import (
 	"time"
 )
 
+// Following the strategy from Wikipedia:
+// https://en.wikipedia.org/wiki/Tic-tac-toe#Strategy
+// There are 8 rules:
+
 func cpuMakeMove(board tictactoeboard) (int, int) {
 
+	// Rule #1: Win
 	if cpuCanWinRightNow(board) {
 		move := cpuPickWinningMove(board)
 		return move.row, move.col
 	}
 
+	// Rule #2: Block
 	row, col, err := cpuGetMoveThatStopsThreeInARow(board)
 	if err == nil {
 		return row, col
 	}
 
-	//Takes Middle Square if possible (may remove this later)
+	// Rule #5: Take Center
 	if board.getSquareValue(1, 1) == SquareEmpty {
 		return 1, 1
 	}
 
-	if cpuOpponentHasOppositeCorners(board) {
-		move, err := cpuPickNonCorner(board)
-		if err == nil {
-			return move.row, move.col
-		}
-	}
-
-	//Takes Corner if Possible (may remove this later)
-	move, err := cpuPickCorner(board)
-	if err == nil {
-		return move.row, move.col
-	}
-
-	move = cpuPickRandomMove(board)
+	// Catch-all: Random Move
+	move := cpuPickRandomMove(board)
 	return move.row, move.col
 }
 

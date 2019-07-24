@@ -280,30 +280,20 @@ func (app *commandLineApp) startGame() {
 
 func (app *commandLineApp) printBoard() {
 
-	b00 := app.board.getSquareValue(0, 0)
-	b01 := app.board.getSquareValue(0, 1)
-	b02 := app.board.getSquareValue(0, 2)
-	b10 := app.board.getSquareValue(1, 0)
-	b11 := app.board.getSquareValue(1, 1)
-	b12 := app.board.getSquareValue(1, 2)
-	b20 := app.board.getSquareValue(2, 0)
-	b21 := app.board.getSquareValue(2, 1)
-	b22 := app.board.getSquareValue(2, 2)
-
 	m := make(map[squareValue]string)
 	m[SquareX] = "X"
 	m[SquareO] = "O"
 	m[SquareEmpty] = "-"
 
-	s00 := m[b00]
-	s01 := m[b01]
-	s02 := m[b02]
-	s10 := m[b10]
-	s11 := m[b11]
-	s12 := m[b12]
-	s20 := m[b20]
-	s21 := m[b21]
-	s22 := m[b22]
+	s00 := m[app.board.getSquareValue(0, 0)]
+	s01 := m[app.board.getSquareValue(0, 1)]
+	s02 := m[app.board.getSquareValue(0, 2)]
+	s10 := m[app.board.getSquareValue(1, 0)]
+	s11 := m[app.board.getSquareValue(1, 1)]
+	s12 := m[app.board.getSquareValue(1, 2)]
+	s20 := m[app.board.getSquareValue(2, 0)]
+	s21 := m[app.board.getSquareValue(2, 1)]
+	s22 := m[app.board.getSquareValue(2, 2)]
 
 	fmt.Printf("| %v | %v | %v |\n", s00, s01, s02)
 	fmt.Printf("| %v | %v | %v |\n", s10, s11, s12)

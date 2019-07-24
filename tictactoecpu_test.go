@@ -6,24 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_cpuMakeMove_emptyBoard_PicksMiddleSquare(t *testing.T) {
-	var board tictactoeboard
-	row, col := cpuMakeMove(board)
-	assert.Equal(t, 1, row)
-	assert.Equal(t, 1, col)
-}
-func Test_opponentDoesNotHave2InARow_middleSquareAvailable_picksMiddleSquare(t *testing.T) {
-	var board tictactoeboard
-	board.board = [3][3]squareValue{
-		{SquareX, SquareEmpty, SquareEmpty},
-		{SquareEmpty, SquareEmpty, SquareEmpty},
-		{SquareEmpty, SquareEmpty, SquareEmpty},
-	}
-	row, col := cpuMakeMove(board)
-	assert.Equal(t, 1, row)
-	assert.Equal(t, 1, col)
-}
-
 //does not lose
 func Test_cpuMakeMove_opponentHasTwoInARow_PicksCorrectSquare(t *testing.T) {
 
@@ -89,31 +71,6 @@ func Test_pickRandomMove_moveIsValid(t *testing.T) {
 	assertMoveInMoves(t, cpuGetAvailableMoves(board), move.row, move.col)
 }
 
-func Test_firstMove_humanPicked_square9_cpuTakesMiddleSquare(t *testing.T) {
-	var board tictactoeboard
-	board.board = [3][3]squareValue{
-		{SquareEmpty, SquareEmpty, SquareEmpty},
-		{SquareEmpty, SquareEmpty, SquareEmpty},
-		{SquareEmpty, SquareEmpty, SquareX},
-	}
-
-	row, col := cpuMakeMove(board)
-	assert.Equal(t, 1, row)
-	assert.Equal(t, 1, col)
-}
-
-func Test_cpuMakeMove_cornerAvailable_opponentDoesNotHaveTwoInARow_middleUnavailable_cpuPicksCorner(t *testing.T) {
-	var board tictactoeboard
-	board.board = [3][3]squareValue{
-		{SquareEmpty, SquareEmpty, SquareEmpty},
-		{SquareEmpty, SquareX, SquareEmpty},
-		{SquareEmpty, SquareEmpty, SquareEmpty},
-	}
-
-	row, col := cpuMakeMove(board)
-	assertCornerMove(t, row, col)
-}
-
 func assertCornerMove(t *testing.T, row, col int) {
 	ok := false
 	if row == 0 && col == 0 {
@@ -129,18 +86,6 @@ func assertCornerMove(t *testing.T, row, col int) {
 		ok = true
 	}
 	assert.Equal(t, true, ok)
-}
-
-func Test_cpuMakeMove_opponentHasOppositeCorners_picksNonCorner(t *testing.T) {
-	var board tictactoeboard
-	board.board = [3][3]squareValue{
-		{SquareX, SquareEmpty, SquareEmpty},
-		{SquareEmpty, SquareO, SquareEmpty},
-		{SquareEmpty, SquareEmpty, SquareX},
-	}
-
-	row, col := cpuMakeMove(board)
-	assertNonCornerMove(t, row, col)
 }
 
 func assertNonCornerMove(t *testing.T, row, col int) {
