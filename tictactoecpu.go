@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -34,6 +35,26 @@ func cpuMakeMove(board tictactoeboard) (int, int) {
 	// If Opponent has 1 possible fork, block it
 	// If Opponent has >1 possible forks AND blocking one of them makes a 2-in-a-row, pick it
 	// If CPU can make a 2-in-a-row, and defending it does not create a fork for opponent, pick it
+	forkMoves := cpuFindForksForPlayer(board, SquareX)
+	if len(forkMoves) == 1 {
+		return forkMoves[0].row, forkMoves[0].col
+	}
+
+	if len(forkMoves) > 1 {
+		for _, move := range forkMoves {
+			tempBoard := board
+			tempBoard.makeMove(SquareO, move.row, move.col)
+
+			if cpuDoesPlayerHaveTwoInARow(board, SquareO) {
+				return move.row, move.col
+			}
+		}
+	}
+
+	if cpuDoesPlayerHaveTwoInARow(board, SquareO) {
+		fmt.Print("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
+		// AND defending it does not create a fork, pick it
+	}
 
 	// Rule #5: Take Center
 	if board.getSquareValue(1, 1) == SquareEmpty {
@@ -107,6 +128,17 @@ func cpuGetAvailableMoves(board tictactoeboard) []rowcolTuple {
 
 func cpuFindForkMove(board tictactoeboard) (int, int, error) {
 
+	forkMoves := cpuFindForksForPlayer(board, SquareO)
+	if len(forkMoves) > 0 {
+		return forkMoves[0].row, forkMoves[0].col, nil
+	}
+	return 0, 0, errors.New("No Forks Found")
+}
+
+func cpuFindForksForPlayer(board tictactoeboard, player squareValue) []rowcolTuple {
+
+	forkMoves := []rowcolTuple{}
+
 	availableMoves := cpuGetAvailableMoves(board)
 
 	// Make the move on a temp board, then count the number of winning squares for CPU.
@@ -128,11 +160,11 @@ func cpuFindForkMove(board tictactoeboard) (int, int, error) {
 		}
 
 		if countWinningSquares >= 2 {
-			return move.row, move.col, nil
+			forkMoves = append(forkMoves, move)
 		}
 	}
 
-	return 0, 0, errors.New("No Fork Found")
+	return forkMoves
 }
 
 func cpuPickRandomMove(board tictactoeboard) rowcolTuple {
@@ -268,4 +300,23 @@ func cpuFindEmptySide(board tictactoeboard) (int, int, error) {
 	}
 
 	return 0, 0, errors.New("No Empty Side Found")
+}
+
+func cpuDoesPlayerHaveTwoInARow(board tictactoeboard, player squareValue) bool {
+
+	availableMoves := cpuGetAvailableMoves(board)
+	for _, move := range availableMoves {
+		tempBoard := board
+		tempBoard.makeMove(player, move.row, move.col)
+		//ugly
+		if tempBoard.determineBoardState() == WinnerX &&
+			player == SquareX {
+			return true
+		}
+		if tempBoard.determineBoardState() == WinnerO &&
+			player == SquareO {
+			return true
+		}
+	}
+	return false
 }

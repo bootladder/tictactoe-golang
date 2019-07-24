@@ -34,6 +34,24 @@ func Test_cpuFindForkMove_(t *testing.T) {
 	assert.Equal(t, 1, col)
 }
 
+//Test the helper method
+func Test_cpuFindForksForPlayer(t *testing.T) {
+
+	var board tictactoeboard
+
+	//Corner square is a fork for O
+	board.board = [3][3]squareValue{
+		{SquareEmpty, SquareO, SquareEmpty},
+		{SquareEmpty, SquareX, SquareO},
+		{SquareEmpty, SquareEmpty, SquareEmpty},
+	}
+
+	forkMoves := cpuFindForksForPlayer(board, SquareO)
+	assert.Equal(t, 1, len(forkMoves))
+	assert.Equal(t, 0, forkMoves[0].row)
+	assert.Equal(t, 2, forkMoves[0].col)
+}
+
 func Test_cpuFindOppositeCorner(t *testing.T) {
 	var board tictactoeboard
 
@@ -90,6 +108,28 @@ func Test_cpuFindEmptySide(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 0, row)
 	assert.Equal(t, 1, col)
+}
+
+func Test_cpuDoesPlayerHaveTwoInARow(t *testing.T) {
+	var board tictactoeboard
+
+	board.board = [3][3]squareValue{
+		{SquareX, SquareEmpty, SquareX},
+		{SquareO, SquareEmpty, SquareX},
+		{SquareO, SquareO, SquareEmpty},
+	}
+
+	twoInARow := cpuDoesPlayerHaveTwoInARow(board, SquareO)
+	assert.Equal(t, true, twoInARow)
+
+	board.board = [3][3]squareValue{
+		{SquareEmpty, SquareEmpty, SquareEmpty},
+		{SquareEmpty, SquareEmpty, SquareEmpty},
+		{SquareEmpty, SquareEmpty, SquareEmpty},
+	}
+
+	twoInARow = cpuDoesPlayerHaveTwoInARow(board, SquareO)
+	assert.Equal(t, false, twoInARow)
 }
 
 ////////////////////////////////////////////////////
