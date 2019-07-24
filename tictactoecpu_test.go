@@ -6,6 +6,95 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_cpuFindForkMove_(t *testing.T) {
+	var board tictactoeboard
+
+	//Corner square is a fork
+	board.board = [3][3]squareValue{
+		{SquareEmpty, SquareO, SquareEmpty},
+		{SquareEmpty, SquareX, SquareO},
+		{SquareEmpty, SquareEmpty, SquareEmpty},
+	}
+
+	row, col, err := cpuFindForkMove(board)
+	assert.NoError(t, err)
+	assert.Equal(t, 0, row)
+	assert.Equal(t, 2, col)
+
+	//Middle Square is a Fork
+	board.board = [3][3]squareValue{
+		{SquareEmpty, SquareO, SquareX},
+		{SquareEmpty, SquareEmpty, SquareO},
+		{SquareEmpty, SquareEmpty, SquareEmpty},
+	}
+
+	row, col, err = cpuFindForkMove(board)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, row)
+	assert.Equal(t, 1, col)
+}
+
+func Test_cpuFindOppositeCorner(t *testing.T) {
+	var board tictactoeboard
+
+	board.board = [3][3]squareValue{
+		{SquareX, SquareEmpty, SquareEmpty},
+		{SquareEmpty, SquareEmpty, SquareEmpty},
+		{SquareEmpty, SquareEmpty, SquareEmpty},
+	}
+
+	row, col, err := cpuFindOppositeCorner(board)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, row)
+	assert.Equal(t, 2, col)
+}
+
+func Test_cpuFindOppositeCorner_noOppositeCorner_returnsError(t *testing.T) {
+	var board tictactoeboard
+
+	board.board = [3][3]squareValue{
+		{SquareX, SquareEmpty, SquareX},
+		{SquareEmpty, SquareEmpty, SquareEmpty},
+		{SquareO, SquareEmpty, SquareO},
+	}
+
+	_, _, err := cpuFindOppositeCorner(board)
+	assert.Error(t, err)
+}
+
+func Test_cpuFindEmptyCorner(t *testing.T) {
+	var board tictactoeboard
+
+	board.board = [3][3]squareValue{
+		{SquareX, SquareEmpty, SquareX},
+		{SquareEmpty, SquareEmpty, SquareEmpty},
+		{SquareO, SquareEmpty, SquareEmpty},
+	}
+
+	row, col, err := cpuFindEmptyCorner(board)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, row)
+	assert.Equal(t, 2, col)
+}
+
+func Test_cpuFindEmptySide(t *testing.T) {
+	var board tictactoeboard
+
+	board.board = [3][3]squareValue{
+		{SquareX, SquareEmpty, SquareX},
+		{SquareO, SquareEmpty, SquareX},
+		{SquareO, SquareO, SquareEmpty},
+	}
+
+	row, col, err := cpuFindEmptySide(board)
+	assert.NoError(t, err)
+	assert.Equal(t, 0, row)
+	assert.Equal(t, 1, col)
+}
+
+////////////////////////////////////////////////////
+// "old tests from before implementing wikipedia strategy"
+///////////////////
 //does not lose
 func Test_cpuMakeMove_opponentHasTwoInARow_PicksCorrectSquare(t *testing.T) {
 

@@ -24,9 +24,36 @@ func cpuMakeMove(board tictactoeboard) (int, int) {
 		return row, col
 	}
 
+	// Rule #3: Fork (Move that makes two 2-in-a-row's)
+	row, col, err = cpuFindForkMove(board)
+	if err == nil {
+		return row, col
+	}
+
+	// Rule #4: Block Fork
+	// If Opponent has 1 possible fork, block it
+	// If Opponent has >1 possible forks AND blocking one of them makes a 2-in-a-row, pick it
+	// If CPU can make a 2-in-a-row, and defending it does not create a fork for opponent, pick it
+
 	// Rule #5: Take Center
 	if board.getSquareValue(1, 1) == SquareEmpty {
 		return 1, 1
+	}
+
+	// Rule #6: Opposite Corner (If opponent has a corner, pick opposite corner)
+	row, col, err = cpuFindOppositeCorner(board)
+	if err == nil {
+		return row, col
+	}
+	// Rule #7: Empty Corner
+	row, col, err = cpuFindEmptyCorner(board)
+	if err == nil {
+		return row, col
+	}
+	// Rule #8: Empty Side
+	row, col, err = cpuFindEmptySide(board)
+	if err == nil {
+		return row, col
 	}
 
 	// Catch-all: Random Move
@@ -76,6 +103,36 @@ func cpuGetAvailableMoves(board tictactoeboard) []rowcolTuple {
 		}
 	}
 	return moves
+}
+
+func cpuFindForkMove(board tictactoeboard) (int, int, error) {
+
+	availableMoves := cpuGetAvailableMoves(board)
+
+	// Make the move on a temp board, then count the number of winning squares for CPU.
+	// If the number of winning squares is 2 or more, then the square is a fork
+	for _, move := range availableMoves {
+		tempBoard := board
+		tempBoard.makeMove(SquareO, move.row, move.col)
+
+		availableMovesAfterPlacingMove := cpuGetAvailableMoves(tempBoard)
+
+		countWinningSquares := 0
+		for _, afterMove := range availableMovesAfterPlacingMove {
+
+			tempBoardAfter := tempBoard
+			tempBoardAfter.makeMove(SquareO, afterMove.row, afterMove.col)
+			if tempBoardAfter.determineBoardState() == WinnerO {
+				countWinningSquares++
+			}
+		}
+
+		if countWinningSquares >= 2 {
+			return move.row, move.col, nil
+		}
+	}
+
+	return 0, 0, errors.New("No Fork Found")
 }
 
 func cpuPickRandomMove(board tictactoeboard) rowcolTuple {
@@ -157,4 +214,58 @@ func cpuPickWinningMove(board tictactoeboard) rowcolTuple {
 		}
 	}
 	return rowcolTuple{0, 0} // THIS SHLD NOT HAPPEN!
+}
+
+func cpuFindOppositeCorner(board tictactoeboard) (int, int, error) {
+	if board.getSquareValue(0, 0) == SquareX &&
+		board.getSquareValue(2, 2) == SquareEmpty {
+		return 2, 2, nil
+	}
+	if board.getSquareValue(0, 2) == SquareX &&
+		board.getSquareValue(2, 0) == SquareEmpty {
+		return 2, 0, nil
+	}
+	if board.getSquareValue(2, 0) == SquareX &&
+		board.getSquareValue(0, 2) == SquareEmpty {
+		return 0, 2, nil
+	}
+	if board.getSquareValue(2, 2) == SquareX &&
+		board.getSquareValue(0, 0) == SquareEmpty {
+		return 0, 0, nil
+	}
+	return 0, 0, errors.New("No Opposite Corner Found")
+}
+
+func cpuFindEmptyCorner(board tictactoeboard) (int, int, error) {
+	if board.getSquareValue(0, 0) == SquareEmpty {
+		return 0, 0, nil
+	}
+	if board.getSquareValue(0, 2) == SquareEmpty {
+		return 0, 2, nil
+	}
+	if board.getSquareValue(2, 0) == SquareEmpty {
+		return 2, 0, nil
+	}
+	if board.getSquareValue(2, 2) == SquareEmpty {
+		return 2, 2, nil
+	}
+
+	return 0, 0, errors.New("No Empty Corner Found")
+}
+
+func cpuFindEmptySide(board tictactoeboard) (int, int, error) {
+	if board.getSquareValue(0, 1) == SquareEmpty {
+		return 0, 1, nil
+	}
+	if board.getSquareValue(1, 0) == SquareEmpty {
+		return 1, 0, nil
+	}
+	if board.getSquareValue(1, 2) == SquareEmpty {
+		return 1, 2, nil
+	}
+	if board.getSquareValue(2, 1) == SquareEmpty {
+		return 2, 1, nil
+	}
+
+	return 0, 0, errors.New("No Empty Side Found")
 }
