@@ -51,6 +51,34 @@ func Test_cpuFindForksForPlayer(t *testing.T) {
 	assert.Equal(t, 0, forkMoves[0].row)
 	assert.Equal(t, 2, forkMoves[0].col)
 }
+func Test_cpuFindForksForPlayer_SquareX(t *testing.T) {
+
+	var board tictactoeboard
+
+	//X has 2 forks
+	board.board = [3][3]squareValue{
+		{SquareEmpty, SquareO, SquareEmpty},
+		{SquareX, SquareX, SquareO},
+		{SquareEmpty, SquareEmpty, SquareEmpty},
+	}
+
+	forkMoves := cpuFindForksForPlayer(board, SquareX)
+	assert.Equal(t, 2, len(forkMoves))
+}
+func Test_cpuFindForksForPlayer_boardXOXdiagonal_Xhas2Forks(t *testing.T) {
+
+	var board tictactoeboard
+
+	//X has 2 corner forks
+	board.board = [3][3]squareValue{
+		{SquareX, SquareEmpty, SquareEmpty},
+		{SquareEmpty, SquareO, SquareEmpty},
+		{SquareEmpty, SquareEmpty, SquareX},
+	}
+
+	forkMoves := cpuFindForksForPlayer(board, SquareX)
+	assert.Equal(t, 2, len(forkMoves))
+}
 
 func Test_cpuFindOppositeCorner(t *testing.T) {
 	var board tictactoeboard

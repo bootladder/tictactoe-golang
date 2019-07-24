@@ -16,18 +16,21 @@ func cpuMakeMove(board tictactoeboard) (int, int) {
 	// Rule #1: Win
 	if cpuCanWinRightNow(board) {
 		move := cpuPickWinningMove(board)
+		fmt.Print("111111111111111111111111")
 		return move.row, move.col
 	}
 
 	// Rule #2: Block
 	row, col, err := cpuGetMoveThatStopsThreeInARow(board)
 	if err == nil {
+		fmt.Print("2222222222222222222222")
 		return row, col
 	}
 
 	// Rule #3: Fork (Move that makes two 2-in-a-row's)
 	row, col, err = cpuFindForkMove(board)
 	if err == nil {
+		fmt.Print("333333333333333333333333")
 		return row, col
 	}
 
@@ -36,25 +39,33 @@ func cpuMakeMove(board tictactoeboard) (int, int) {
 	// If Opponent has >1 possible forks AND blocking one of them makes a 2-in-a-row, pick it
 	// If CPU can make a 2-in-a-row, and defending it does not create a fork for opponent, pick it
 	forkMoves := cpuFindForksForPlayer(board, SquareX)
+	fmt.Printf("LEN OF FORKMOVES IS    %d  ", len(forkMoves))
 	if len(forkMoves) == 1 {
+		fmt.Print("444444444444444444444444")
 		return forkMoves[0].row, forkMoves[0].col
 	}
 
 	if len(forkMoves) > 1 {
-		for _, move := range forkMoves {
-			tempBoard := board
-			tempBoard.makeMove(SquareO, move.row, move.col)
-
-			if cpuDoesPlayerHaveTwoInARow(board, SquareO) {
-				return move.row, move.col
-			}
+		row, col, err := cpuFindEmptySide(board)
+		if err != nil {
+			fmt.Print("NOOOOOOT EXPETED EMPTY SIDE NOT FOUND")
 		}
+		fmt.Printf("RETURNING SIDE :: %d %d", row, col)
+		return row, col
+		//for _, move := range forkMoves {
+		//	tempBoard := board
+		//	tempBoard.makeMove(SquareO, move.row, move.col)
+
+		//	if cpuDoesPlayerHaveTwoInARow(board, SquareO) {
+		//		return move.row, move.col
+		//	}
+		//}
 	}
 
-	if cpuDoesPlayerHaveTwoInARow(board, SquareO) {
-		fmt.Print("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
-		// AND defending it does not create a fork, pick it
-	}
+	//if cpuDoesPlayerHaveTwoInARow(board, SquareO) {
+	//	fmt.Print("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
+	//	// AND defending it does not create a fork, pick it
+	//}
 
 	// Rule #5: Take Center
 	if board.getSquareValue(1, 1) == SquareEmpty {
@@ -69,6 +80,7 @@ func cpuMakeMove(board tictactoeboard) (int, int) {
 	// Rule #7: Empty Corner
 	row, col, err = cpuFindEmptyCorner(board)
 	if err == nil {
+		fmt.Print("777777777777777777777777")
 		return row, col
 	}
 	// Rule #8: Empty Side
@@ -145,7 +157,7 @@ func cpuFindForksForPlayer(board tictactoeboard, player squareValue) []rowcolTup
 	// If the number of winning squares is 2 or more, then the square is a fork
 	for _, move := range availableMoves {
 		tempBoard := board
-		tempBoard.makeMove(SquareO, move.row, move.col)
+		tempBoard.makeMove(player, move.row, move.col)
 
 		availableMovesAfterPlacingMove := cpuGetAvailableMoves(tempBoard)
 
@@ -153,8 +165,15 @@ func cpuFindForksForPlayer(board tictactoeboard, player squareValue) []rowcolTup
 		for _, afterMove := range availableMovesAfterPlacingMove {
 
 			tempBoardAfter := tempBoard
-			tempBoardAfter.makeMove(SquareO, afterMove.row, afterMove.col)
-			if tempBoardAfter.determineBoardState() == WinnerO {
+			tempBoardAfter.makeMove(player, afterMove.row, afterMove.col)
+
+			//ugly
+			if tempBoardAfter.determineBoardState() == WinnerO &&
+				player == SquareO {
+				countWinningSquares++
+			}
+			if tempBoardAfter.determineBoardState() == WinnerX &&
+				player == SquareX {
 				countWinningSquares++
 			}
 		}

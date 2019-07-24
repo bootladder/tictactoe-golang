@@ -77,7 +77,7 @@ func (app *commandLineApp) printAppState() {
 		fmt.Print("Ready to Play!\n")
 	case AppStatePlaying:
 		fmt.Print("Playing!\n")
-		app.printBoard()
+		printBoard(app.board)
 	case AppStateGameOver:
 		fmt.Print("GAME OVER!\n")
 		switch app.board.determineBoardState() {
@@ -88,7 +88,7 @@ func (app *commandLineApp) printAppState() {
 		case TieGame:
 			fmt.Print("Tie Game!\n")
 		}
-		app.printBoard()
+		printBoard(app.board)
 	case AppStateDoingFuzzTest:
 		fmt.Print("Fuzzing... will stop when CPU loses\n")
 	}
@@ -202,24 +202,25 @@ func (app *commandLineApp) handleCommand(command commandLineAppCommand) {
 		fuzzBoard := tictactoeboard{}
 
 		for ok := true; ok; ok = true {
-			fmt.Print("\nPlaying fuzz game...")
 			if fuzzBoard.determineBoardState() == WinnerX {
-				fmt.Print("\nX won.... not good!!")
-				fmt.Printf("%v", fuzzBoard.board)
+				fmt.Print("\nX won.... not good!!\n")
+				printBoard(fuzzBoard)
 				os.Exit(2)
 			}
 			if fuzzBoard.determineBoardState() == WinnerO {
-				fmt.Print("O won")
+				fmt.Print("O won\n")
 			}
 			if fuzzBoard.determineBoardState() == TieGame {
-				fmt.Print("Tie Game")
+				fmt.Print("Tie Game\n")
 			}
+
+			fmt.Print("\nPlaying fuzz game...\n")
 			fuzzBoard.init()
 
 			for zzz := true; zzz; zzz = true {
 				//Make Random Human Move
 				move := cpuPickRandomMove(fuzzBoard)
-				//fmt.Printf("X Plays: %d %d\n", move.row, move.col)
+				fmt.Printf("X Plays: %d %d\n", move.row, move.col)
 				fuzzBoard.makeMove(SquareX, move.row, move.col)
 
 				//Check Game State
@@ -231,7 +232,7 @@ func (app *commandLineApp) handleCommand(command commandLineAppCommand) {
 
 				//Make CPU move
 				cpuRow, cpuCol := cpuMakeMove(fuzzBoard)
-				//fmt.Printf("O Plays: %d %d\n", cpuRow, cpuCol)
+				fmt.Printf("O Plays: %d %d\n", cpuRow, cpuCol)
 				fuzzBoard.makeMove(SquareO, cpuRow, cpuCol)
 
 				//Check Game State
@@ -278,22 +279,22 @@ func (app *commandLineApp) startGame() {
 	app.board.init()
 }
 
-func (app *commandLineApp) printBoard() {
+func printBoard(board tictactoeboard) {
 
 	m := make(map[squareValue]string)
 	m[SquareX] = "X"
 	m[SquareO] = "O"
 	m[SquareEmpty] = "-"
 
-	s00 := m[app.board.getSquareValue(0, 0)]
-	s01 := m[app.board.getSquareValue(0, 1)]
-	s02 := m[app.board.getSquareValue(0, 2)]
-	s10 := m[app.board.getSquareValue(1, 0)]
-	s11 := m[app.board.getSquareValue(1, 1)]
-	s12 := m[app.board.getSquareValue(1, 2)]
-	s20 := m[app.board.getSquareValue(2, 0)]
-	s21 := m[app.board.getSquareValue(2, 1)]
-	s22 := m[app.board.getSquareValue(2, 2)]
+	s00 := m[board.getSquareValue(0, 0)]
+	s01 := m[board.getSquareValue(0, 1)]
+	s02 := m[board.getSquareValue(0, 2)]
+	s10 := m[board.getSquareValue(1, 0)]
+	s11 := m[board.getSquareValue(1, 1)]
+	s12 := m[board.getSquareValue(1, 2)]
+	s20 := m[board.getSquareValue(2, 0)]
+	s21 := m[board.getSquareValue(2, 1)]
+	s22 := m[board.getSquareValue(2, 2)]
 
 	fmt.Printf("| %v | %v | %v |\n", s00, s01, s02)
 	fmt.Printf("| %v | %v | %v |\n", s10, s11, s12)
