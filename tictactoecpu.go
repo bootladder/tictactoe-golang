@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"math/rand"
 	"time"
 )
@@ -16,21 +15,18 @@ func cpuMakeMove(board tictactoeboard) (int, int) {
 	// Rule #1: Win
 	if cpuCanWinRightNow(board) {
 		move := cpuPickWinningMove(board)
-		fmt.Print("111111111111111111111111")
 		return move.row, move.col
 	}
 
 	// Rule #2: Block
 	row, col, err := cpuGetMoveThatStopsThreeInARow(board)
 	if err == nil {
-		fmt.Print("2222222222222222222222")
 		return row, col
 	}
 
 	// Rule #3: Fork (Move that makes two 2-in-a-row's)
 	row, col, err = cpuFindForkMove(board)
 	if err == nil {
-		fmt.Print("333333333333333333333333")
 		return row, col
 	}
 
@@ -39,27 +35,50 @@ func cpuMakeMove(board tictactoeboard) (int, int) {
 	// If Opponent has >1 possible forks AND blocking one of them makes a 2-in-a-row, pick it
 	// If CPU can make a 2-in-a-row, and defending it does not create a fork for opponent, pick it
 	forkMoves := cpuFindForksForPlayer(board, SquareX)
-	fmt.Printf("LEN OF FORKMOVES IS    %d  ", len(forkMoves))
+	//fmt.Printf("LEN OF FORKMOVES IS    %d  ", len(forkMoves))
+	//fmt.Printf("%v", forkMoves)
 	if len(forkMoves) == 1 {
-		fmt.Print("444444444444444444444444")
 		return forkMoves[0].row, forkMoves[0].col
 	}
 
 	if len(forkMoves) > 1 {
-		row, col, err := cpuFindEmptySide(board)
-		if err != nil {
-			fmt.Print("NOOOOOOT EXPETED EMPTY SIDE NOT FOUND")
-		}
-		fmt.Printf("RETURNING SIDE :: %d %d", row, col)
-		return row, col
-		//for _, move := range forkMoves {
-		//	tempBoard := board
-		//	tempBoard.makeMove(SquareO, move.row, move.col)
+		// Find moves that block one of the forks
+		// AND create a 2 in a row
 
-		//	if cpuDoesPlayerHaveTwoInARow(board, SquareO) {
-		//		return move.row, move.col
-		//	}
-		//}
+		// If we make a move and it lowers the number of forks, then it's a block
+		for _, move := range cpuGetAvailableMoves(board) {
+			tempBoard := board
+			tempBoard.makeMove(SquareO, move.row, move.col)
+
+			forkMovesAfter := cpuFindForksForPlayer(tempBoard, SquareX)
+			if len(forkMovesAfter) < len(forkMoves) {
+				//got a fork blocker.  does it also make a 2 in a row for us?
+				if cpuDoesPlayerHaveTwoInARow(tempBoard, SquareO) {
+
+					//got a two in a row.  Does defending the two in a row
+					//give the opponent a fork?
+					blockingRow, blockingCol, err := cpuGetMoveThatStopsThreeInARowForPlayer(tempBoard, SquareO)
+					if err == nil {
+
+						opponentStoppingWillMakeAFork := false
+
+						forkMovesFinally := cpuFindForksForPlayer(tempBoard, SquareX)
+						for _, forkMoveFinally := range forkMovesFinally {
+
+							if forkMoveFinally.row == blockingRow &&
+								forkMoveFinally.col == blockingCol {
+								opponentStoppingWillMakeAFork = true
+							}
+						}
+
+						if opponentStoppingWillMakeAFork == false {
+							return move.row, move.col
+						}
+					}
+
+				}
+			}
+		}
 	}
 
 	//if cpuDoesPlayerHaveTwoInARow(board, SquareO) {
@@ -80,7 +99,6 @@ func cpuMakeMove(board tictactoeboard) (int, int) {
 	// Rule #7: Empty Corner
 	row, col, err = cpuFindEmptyCorner(board)
 	if err == nil {
-		fmt.Print("777777777777777777777777")
 		return row, col
 	}
 	// Rule #8: Empty Side
@@ -112,17 +130,28 @@ type rowcolTuple struct {
 
 func cpuGetMoveThatStopsThreeInARow(board tictactoeboard) (int, int, error) {
 
+	return cpuGetMoveThatStopsThreeInARowForPlayer(board, SquareX)
+}
+
+func cpuGetMoveThatStopsThreeInARowForPlayer(board tictactoeboard, player squareValue) (int, int, error) {
+
 	availableMoves := cpuGetAvailableMoves(board)
 
-	// If the opponent were to pick this move, would they win?
+	// If the player were to pick this move, would they win?
 	for _, move := range availableMoves {
 		tempBoard := board
-		tempBoard.makeMove(SquareX, move.row, move.col)
-		if tempBoard.determineBoardState() == WinnerX {
+		tempBoard.makeMove(player, move.row, move.col)
+		if tempBoard.determineBoardState() == WinnerX &&
+			player == SquareX {
+			return move.row, move.col, nil
+		}
+		if tempBoard.determineBoardState() == WinnerO &&
+			player == SquareO {
 			return move.row, move.col, nil
 		}
 	}
-	return 0, 0, errors.New("No Move that stops Three in a row")
+
+	return 0, 0, errors.New("No Moves that Stops 3 in a row")
 }
 
 func cpuGetAvailableMoves(board tictactoeboard) []rowcolTuple {

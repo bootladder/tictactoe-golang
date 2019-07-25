@@ -158,6 +158,43 @@ func Test_cpuDoesPlayerHaveTwoInARow(t *testing.T) {
 
 	twoInARow = cpuDoesPlayerHaveTwoInARow(board, SquareO)
 	assert.Equal(t, false, twoInARow)
+
+	board.board = [3][3]squareValue{
+		{SquareX, SquareEmpty, SquareEmpty},
+		{SquareX, SquareEmpty, SquareEmpty},
+		{SquareEmpty, SquareEmpty, SquareEmpty},
+	}
+
+	twoInARow = cpuDoesPlayerHaveTwoInARow(board, SquareX)
+	assert.Equal(t, true, twoInARow)
+}
+
+func Test_cpuGetMoveThatStopsThreeInARowForPlayer_X_Stops3InARowX(t *testing.T) {
+	var board tictactoeboard
+	board.board = [3][3]squareValue{
+		{SquareX, SquareX, SquareEmpty},
+		{SquareEmpty, SquareEmpty, SquareEmpty},
+		{SquareEmpty, SquareEmpty, SquareEmpty},
+	}
+
+	row, col, err := cpuGetMoveThatStopsThreeInARowForPlayer(board, SquareX)
+	assert.NoError(t, err)
+	assert.Equal(t, 0, row)
+	assert.Equal(t, 2, col)
+}
+
+func Test_cpuGetMoveThatStopsThreeInARowForPlayer_O_Stops3InARowO(t *testing.T) {
+	var board tictactoeboard
+	board.board = [3][3]squareValue{
+		{SquareX, SquareO, SquareEmpty},
+		{SquareEmpty, SquareO, SquareEmpty},
+		{SquareEmpty, SquareEmpty, SquareX},
+	}
+
+	row, col, err := cpuGetMoveThatStopsThreeInARowForPlayer(board, SquareO)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, row)
+	assert.Equal(t, 1, col)
 }
 
 ////////////////////////////////////////////////////
